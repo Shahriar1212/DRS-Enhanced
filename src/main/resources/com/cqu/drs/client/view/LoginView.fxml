@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane styleClass="login-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.cqu.drs.client.controller.LoginController">
+    <VBox styleClass="login-card" maxWidth="430" maxHeight="-Infinity">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="DRS" styleClass="logo-mark"/>
+            <VBox>
+                <Label text="Disaster Response System" styleClass="login-title"/>
+                <Label text="DRS-Enhanced  |  secure sign-in" styleClass="page-subtitle"/>
+            </VBox>
+        </HBox>
+        <Separator/>
+        <Label text="Server (host:port)" styleClass="form-label"/>
+        <TextField fx:id="serverField" promptText="localhost:5050"/>
+        <Label text="Username" styleClass="form-label"/>
+        <TextField fx:id="usernameField" promptText="e.g. coord"/>
+        <Label text="Password" styleClass="form-label"/>
+        <PasswordField fx:id="passwordField" promptText="Password"/>
+        <Button fx:id="loginButton" text="Log in" onAction="#login" styleClass="primary-button" maxWidth="Infinity" defaultButton="true"/>
+        <Label fx:id="statusLabel" wrapText="true" maxWidth="360"/>
+        <Hyperlink text="New member of the public? Create a reporter account" onAction="#toggleRegister"/>
+        <VBox fx:id="registerBox" spacing="6">
+            <padding><Insets top="4"/></padding>
+            <TextField fx:id="regFullNameField" promptText="Full name"/>
+            <TextField fx:id="regUsernameField" promptText="Choose a username"/>
+            <PasswordField fx:id="regPasswordField" promptText="Password (8+ chars, letter, digit, symbol)"/>
+            <Button text="Create account" onAction="#register" styleClass="accent-button"/>
+        </VBox>
+        <Separator/>
+        <Label styleClass="hint" wrapText="true" maxWidth="360"
+               text="Demo accounts: admin / Admin@123,  coord / Coord@123,  officer / Officer@123,  public / Public@123. Accounts lock after 5 failed attempts."/>
+    </VBox>
+</StackPane>

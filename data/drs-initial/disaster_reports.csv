@@ -1,0 +1,6 @@
+type,location,description,reporter_name,reporter_phone,severity
+FIRE,Rockhampton CBD,"Warehouse fire on Quay Street, thick smoke spreading to nearby shops",Alex Chen,0400 123 456,HIGH
+EARTHQUAKE,Yeppoon,"Magnitude 5 tremor, cracked buildings along the Esplanade",Alex Chen,0400 123 456,CRITICAL
+HURRICANE,Gladstone,"Category 3 cyclone crossing the coast, roofs lifted and power lines down",Maria Lopez,0411 222 333,CRITICAL
+FLOOD,Rockhampton North,"Fitzroy River rising, low-lying streets flooding",Tom Baker,0422 444 555,
+LANDSLIDE,Mount Morgan,"Slip across the Burnett Highway after heavy rain, one car trapped",Nina Patel,0433 666 777,MEDIUM

@@ -1,0 +1,32 @@
+sequenceDiagram
+  autonumber
+  actor O as Field Officer
+  participant DV as DamageView + DamageController
+  participant RP as RestorationPlanner
+  participant SRV as Server (ClientHandler + RequestDispatcher)
+  participant DMS as DamageService
+  participant DB as MySQL (DamageDAO, DepartmentDAO)
+  participant A as AuditService
+  O->>DV: choose disaster, category, damage level, cost, people
+  DV->>RP: priority() / estimatedDays() (live preview)
+  O->>DV: click Record Damage & Raise Job
+  DV->>SRV: Request RECORD_DAMAGE
+  SRV->>SRV: AccessControl: FIELD_OFFICER or above
+  SRV->>DMS: recordDamage(user, reportId, category, level, cost, people, notes)
+  DMS->>DB: BEGIN, check report, load departments
+  DMS->>RP: responsibleDepartment(category, departments)
+  RP-->>DMS: e.g. POWER → Ergon Energy
+  DMS->>DB: INSERT damage_assessments → assessment_id
+  DMS->>RP: createJob(assessment, department, location)
+  RP-->>DMS: RestorationJob (priority, est. days, PLANNED)
+  DMS->>DB: INSERT restoration_jobs, COMMIT
+  DMS->>A: record(RECORD_DAMAGE)
+  SRV-->>DV: ok "job #n assigned to Ergon Energy"
+  O->>DV: Restoration tab: select job, slider to 100%, Update Progress
+  DV->>SRV: Request UPDATE_JOB_PROGRESS
+  SRV->>DMS: updateProgress(user, jobId, 100)
+  DMS->>DB: SELECT job FOR UPDATE, job.updateProgress() → COMPLETED, UPDATE, COMMIT
+  DV->>SRV: Request RECOVERY_SUMMARY
+  SRV->>DMS: summary(reportId)
+  DMS->>RP: summarise(assessments, jobs)
+  SRV-->>DV: total cost, people affected, jobs completed, % restored

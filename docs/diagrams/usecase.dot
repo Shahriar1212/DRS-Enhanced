@@ -1,0 +1,48 @@
+digraph UC {
+  rankdir=LR; splines=true; nodesep=0.25; ranksep=1.1;
+  node [fontname="Helvetica", fontsize=11];
+  edge [arrowhead=none, color="#555555"];
+  label="Actor generalisation (hollow arrows): each role inherits all use cases of the role it points to.\nOrange = new DRS-Enhanced features; green = administration & security"; labelloc=b; fontname="Helvetica"; fontsize=11;
+  pub   [shape=none, label="🧍\nPublic Reporter", fontsize=12];
+  off   [shape=none, label="🧍\nField Officer", fontsize=12];
+  coord [shape=none, label="🧍\nEmergency\nCoordinator", fontsize=12];
+  adm   [shape=none, label="🧍\nAdministrator", fontsize=12];
+  dept  [shape=none, label="🏢\nExternal Department\n(fire, hospital, power,\ntransport, water, waste,\nschools, police)", fontsize=11];
+  subgraph cluster_sys {
+    label="DRS-Enhanced"; fontname="Helvetica-Bold"; fontsize=14; style=rounded; color="#1c3a5e";
+    node [shape=ellipse, style=filled, fillcolor="#e7f0fb", color="#1c3a5e"];
+    login [label="Log in / log out"];
+    reg [label="Register reporter account"];
+    rep [label="Report disaster"];
+    mine [label="View my reports"];
+    warn [label="View active warnings\n& shelters"];
+    dash [label="View dashboard &\nprioritised reports"];
+    assess [label="Assess & prioritise report"];
+    coordr [label="Coordinate departments\n(create response tasks)"];
+    vol [label="Register / assign volunteer"];
+    res [label="Allocate / restock resource"];
+    task [label="Update task status /\nresolve report"];
+    node [fillcolor="#ffe8cc", color="#e8590c"];
+    alert [label="NEW: Issue / lift\nevacuation warning"];
+    shel [label="NEW: Manage shelters,\ncheck evacuees in/out"];
+    recs [label="NEW: Recommend shelter"];
+    dmg [label="NEW: Record damage\nassessment"];
+    job [label="NEW: Raise restoration job"];
+    prog [label="NEW: Update job progress /\nrecovery summary"];
+    node [fillcolor="#ebfbee", color="#2b8a3e"];
+    users [label="Manage users & roles"];
+    audit [label="View / verify signed\naudit log"];
+    imp [label="Import DRS-Initial data"];
+  }
+  pub -> {login reg rep mine warn};
+  off -> {dash shel recs dmg prog task};
+  coord -> {assess vol res alert};
+  adm -> {users audit imp};
+  edge [arrowhead=empty, color="#1c3a5e", constraint=false];
+  off -> pub; coord -> off; adm -> coord;
+  edge [arrowhead=none, color="#555555", constraint=true];
+  {coordr res job} -> dept;
+  assess -> coordr [arrowhead=open, style=dashed, label="«include»", fontsize=9];
+  dmg -> job [arrowhead=open, style=dashed, label="«include»", fontsize=9];
+  alert -> recs [arrowhead=open, style=dashed, label="«extend»", fontsize=9, dir=back, constraint=false];
+}

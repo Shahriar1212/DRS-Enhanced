@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NetBeans actions for DRS-Enhanced.
+     Run Project (F6 / green arrow) = JavaFX client.
+     Right-click project > Run Maven > "Run DRS Server" = server.
+     Run File (Shift+F6) on ServerMain.java also starts the server. -->
+<actions>
+    <action>
+        <actionName>run</actionName>
+        <goals>
+            <goal>process-classes</goal>
+            <goal>javafx:run</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>debug</actionName>
+        <goals>
+            <goal>process-classes</goal>
+            <goal>javafx:run</goal>
+        </goals>
+        <properties>
+            <jpda.listen>true</jpda.listen>
+        </properties>
+    </action>
+    <action>
+        <actionName>test</actionName>
+        <goals>
+            <goal>test</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>CUSTOM-run-server</actionName>
+        <displayName>Run DRS Server</displayName>
+        <goals>
+            <goal>process-classes</goal>
+            <goal>exec:java</goal>
+        </goals>
+        <properties>
+            <exec.mainClass>com.cqu.drs.server.ServerMain</exec.mainClass>
+        </properties>
+    </action>
+    <action>
+        <actionName>CUSTOM-run-client</actionName>
+        <displayName>Run DRS Client</displayName>
+        <goals>
+            <goal>process-classes</goal>
+            <goal>javafx:run</goal>
+        </goals>
+    </action>
+</actions>

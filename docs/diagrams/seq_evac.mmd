@@ -1,0 +1,40 @@
+sequenceDiagram
+  autonumber
+  actor C as Coordinator
+  actor O as Field Officer
+  participant EV as EvacuationView + EvacuationController
+  participant EP as EvacuationPlanner
+  participant SRV as Server (ClientHandler + RequestDispatcher)
+  participant ES as EvacuationService
+  participant DB as MySQL (ShelterDAO)
+  participant A as AuditService
+  C->>EV: choose open disaster report
+  EV->>EP: recommendAlertLevel(severity)
+  EP-->>EV: e.g. CRITICAL → Emergency Warning
+  C->>EV: zone + shelter, click Issue Warning
+  EV->>SRV: Request ISSUE_ALERT (reportId, zone, level, shelterId)
+  SRV->>SRV: AccessControl: COORDINATOR or above
+  SRV->>ES: issueAlert(user, ...)
+  ES->>DB: read report and shelter (must be open and have room)
+  ES->>EP: draftMessage(report, level, zone, shelter)
+  ES->>DB: INSERT evacuation_alerts (issued_by, issued_at)
+  ES->>A: record(ISSUE_ALERT)
+  SRV-->>EV: Response.ok(alert)
+  Note over EV: Public reporters now see the active warning on their Report screen
+  O->>EV: Shelters tab: zone + people, click Recommend
+  EV->>SRV: Request RECOMMEND_SHELTER
+  SRV->>ES: recommend(zone, people)
+  ES->>EP: recommendShelter(shelters, zone, people) [PriorityQueue]
+  SRV-->>EV: best shelter selected in table
+  O->>EV: click Check in (people)
+  EV->>SRV: Request CHECK_IN_EVACUEES
+  SRV->>ES: changeOccupancy(user, shelterId, people, true)
+  ES->>DB: BEGIN, SELECT shelter FOR UPDATE (row lock)
+  alt enough free places
+    ES->>DB: UPDATE occupancy, COMMIT
+    ES->>A: record(CHECK_IN_EVACUEES)
+    SRV-->>EV: ok "n checked in - x/y (OPEN or FULL)"
+  else shelter full or closed
+    ES->>DB: ROLLBACK
+    SRV-->>EV: error "has only k free places"
+  end

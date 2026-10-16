@@ -1,0 +1,124 @@
+classDiagram
+  direction TB
+  namespace Client {
+    class ClientApp {
+      +start(Stage)
+      +showLogin()$
+      +showMain()$
+    }
+    class LoginController {
+      -TextField usernameField
+      -PasswordField passwordField
+      -login()
+      -register()
+    }
+    class EvacuationController {
+      -TableView~EvacuationAlert~ alertsTable
+      -TableView~Shelter~ sheltersTable
+      -issueAlert()
+      -liftAlert()
+      -checkIn()
+      -recommendShelter()
+    }
+    class DamageController {
+      -TableView~RestorationJob~ jobsTable
+      -recordDamage()
+      -updateProgress()
+    }
+    class ServerConnection {
+      -Socket socket
+      -String sessionToken
+      +connect()
+      +send(Request) Response
+    }
+    class ServerCall {
+      +send(Request, Consumer~Response~)$
+    }
+  }
+  namespace Protocol {
+    class Request {
+      -Command command
+      -String sessionToken
+      -HashMap params
+      +with(String, Serializable) Request
+      +getInt(String) int
+    }
+    class Response {
+      -boolean success
+      -String message
+      -Serializable data
+      +ok(String, Serializable)$ Response
+      +error(String)$ Response
+    }
+  }
+  namespace Server {
+    class DRSServer {
+      -ServerSocket serverSocket
+      -ExecutorService pool
+      +start()
+      +stop()
+    }
+    class ClientHandler {
+      -Socket socket
+      +run()
+    }
+    class RequestDispatcher {
+      +handle(Request) Response
+    }
+    class SessionManager {
+      -ConcurrentHashMap sessions
+      +create(User) String
+      +get(String) Session
+    }
+    class EvacuationService {
+      +issueAlert(...) EvacuationAlert
+      +liftAlert(User, int)
+      +changeOccupancy(User, int, int, boolean) Shelter
+      +recommend(String, int) Shelter
+    }
+    class DamageService {
+      +recordDamage(...) RestorationJob
+      +updateProgress(User, int, int)
+      +summary(int) RecoverySummary
+    }
+    class AuditService {
+      +record(String, String, String) AuditEntry
+      +verify() List~AuditEntry~
+    }
+    class AccessControl {
+      +isAllowed(Role, Command)$ boolean
+    }
+  }
+  namespace Data {
+    class DatabaseManager {
+      +initialise()
+      +getConnection() Connection
+    }
+    class ShelterDAO {
+      +findShelterForUpdate(Connection, int) Shelter
+      +insertAlert(Connection, EvacuationAlert) int
+    }
+    class DamageDAO {
+      +insertAssessment(Connection, DamageAssessment) int
+      +insertJob(Connection, RestorationJob) int
+    }
+  }
+  ClientApp ..> LoginController : loads FXML
+  LoginController ..> ServerCall
+  EvacuationController ..> ServerCall
+  DamageController ..> ServerCall
+  ServerCall --> ServerConnection
+  ServerConnection ..> Request : sends
+  ServerConnection ..> Response : receives
+  DRSServer "1" o-- "0..*" ClientHandler : thread pool runs
+  ClientHandler --> RequestDispatcher
+  RequestDispatcher --> SessionManager
+  RequestDispatcher ..> AccessControl
+  RequestDispatcher --> EvacuationService
+  RequestDispatcher --> DamageService
+  EvacuationService --> ShelterDAO
+  DamageService --> DamageDAO
+  EvacuationService --> AuditService
+  DamageService --> AuditService
+  ShelterDAO ..> DatabaseManager
+  DamageDAO ..> DatabaseManager

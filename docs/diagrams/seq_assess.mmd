@@ -1,0 +1,45 @@
+sequenceDiagram
+  autonumber
+  actor P as Public Reporter
+  actor C as Coordinator
+  participant V as ReportView / DashboardView (FXML)
+  participant CT as Report/DashboardController
+  participant SC as ServerConnection
+  participant H as ClientHandler (pool thread)
+  participant D as RequestDispatcher
+  participant DS as DisasterService
+  participant CS as CoordinationService / PriorityCalculator
+  participant DB as MySQL (DAOs)
+  participant A as AuditService
+  P->>V: fill form, click Submit Report
+  V->>CT: submitReport()
+  CT->>CT: validate fields (Validation)
+  CT->>SC: send(Request REPORT_DISASTER) [background Task]
+  SC->>H: serialised Request over TCP
+  H->>D: handle(request)
+  D->>D: session valid? AccessControl.isAllowed(REPORTER)
+  D->>DS: report(user, type, location, ...)
+  DS->>DS: sign canonicalContent with user's RSA key
+  DS->>DB: INSERT disaster_reports (phone AES-encrypted)
+  DB-->>DS: generated report_id
+  DS->>A: record(REPORT_DISASTER) - hash chained + signed
+  A->>DB: INSERT audit_log
+  D-->>SC: Response.ok("Report #n submitted")
+  SC-->>CT: response on FX thread
+  CT-->>V: green status message, refresh My reports
+  C->>V: select report, choose severity, Assess & Coordinate
+  V->>CT: assess()
+  CT->>SC: send(Request ASSESS_REPORT)
+  SC->>H: Request
+  H->>D: handle(request)
+  D->>D: AccessControl.isAllowed(COORDINATOR)
+  D->>DS: assess(user, reportId, severity)
+  DS->>DB: BEGIN, SELECT ... FOR UPDATE
+  DS->>CS: calculate(type, severity) → priority
+  DS->>CS: coordinateResponse(report, departments)
+  CS-->>DS: ResponseTask list (relevant departments)
+  DS->>DB: INSERT response_tasks, UPDATE report, COMMIT
+  DS->>A: record(ASSESS_REPORT)
+  D-->>SC: Response.ok(priority, tasks created)
+  SC-->>CT: response
+  CT-->>V: refresh table and dashboard cards

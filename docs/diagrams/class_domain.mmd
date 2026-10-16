@@ -1,0 +1,174 @@
+classDiagram
+  direction LR
+  class DisasterReport {
+    -int reportId
+    -DisasterType type
+    -String location
+    -String description
+    -String reporterName
+    -String reporterPhone
+    -SeverityLevel severity
+    -int priorityScore
+    -Status status
+    -LocalDateTime dateReported
+    -String reportedBy
+    -String signature
+    +canonicalContent() String
+    +getSummary() String
+    +isSigned() boolean
+    +toString() String
+  }
+  class Department {
+    -int departmentId
+    -String name
+    -DepartmentType type
+    -String contactInfo
+    -List~Resource~ resources
+    +addResource(Resource)
+    +toString() String
+  }
+  class Resource {
+    -int resourceId
+    -int departmentId
+    -String name
+    -int quantityAvailable
+    -int reorderLevel
+    +isLowStock() boolean
+    +deduct(int)
+    +restock(int)
+    +toString() String
+  }
+  class ResponseTask {
+    -int taskId
+    -String description
+    -Status status
+    -int priority
+    +assignVolunteer(Volunteer)
+    +getDepartmentName() String
+    +toString() String
+  }
+  class Volunteer {
+    -int volunteerId
+    -String name
+    -String phone
+    -String skill
+    -boolean available
+    +toString() String
+  }
+  class User {
+    -int userId
+    -String username
+    -String fullName
+    -Role role
+    -boolean active
+    +toString() String
+  }
+  class Shelter {
+    -int shelterId
+    -String name
+    -String location
+    -int capacity
+    -int occupancy
+    -boolean closed
+    +getFreeSpaces() int
+    +getStatus() String
+    +canAccept(int) boolean
+    +checkIn(int)
+    +checkOut(int)
+    +toString() String
+  }
+  class EvacuationAlert {
+    -int alertId
+    -int reportId
+    -String zone
+    -AlertLevel level
+    -String message
+    -Integer shelterId
+    -AlertStatus status
+    -String issuedBy
+    -LocalDateTime issuedAt
+    -LocalDateTime liftedAt
+    +lift()
+    +toString() String
+  }
+  class DamageAssessment {
+    -int assessmentId
+    -int reportId
+    -InfrastructureCategory category
+    -DamageLevel damageLevel
+    -double estimatedCost
+    -int affectedPeople
+    -String assessedBy
+    +toString() String
+  }
+  class RestorationJob {
+    -int jobId
+    -int assessmentId
+    -int departmentId
+    -String description
+    -int priority
+    -int progress
+    -JobStatus status
+    -int estimatedDays
+    +updateProgress(int)
+    +toString() String
+  }
+  class AuditEntry {
+    -long auditId
+    -LocalDateTime timestamp
+    -String username
+    -String action
+    -String details
+    -String previousHash
+    -String entryHash
+    -String signature
+    +canonicalContent() String
+  }
+  class Role {
+    <<enumeration>>
+    REPORTER
+    FIELD_OFFICER
+    COORDINATOR
+    ADMIN
+    +atLeast(Role) boolean
+  }
+  class AlertLevel {
+    <<enumeration>>
+    ADVICE
+    WATCH_AND_ACT
+    EMERGENCY_WARNING
+  }
+  class InfrastructureCategory {
+    <<enumeration>>
+    BUILDINGS
+    ROADS_AND_BRIDGES
+    MARITIME
+    POWER
+    WATER_SUPPLY
+    DEBRIS_AND_WASTE
+    SCHOOLS
+    PUBLIC_HEALTH
+    +getResponsibleDepartment() DepartmentType
+  }
+  class DamageLevel {
+    <<enumeration>>
+    MINOR
+    MODERATE
+    MAJOR
+    DESTROYED
+  }
+  Department "1" *-- "0..*" Resource : holds
+  DisasterReport "1" <-- "0..*" ResponseTask : for
+  Department "1" <-- "0..*" ResponseTask : carried out by
+  ResponseTask "0..*" --> "0..1" Volunteer : assigned
+  DisasterReport "1" <-- "0..*" EvacuationAlert : warns about
+  EvacuationAlert "0..*" --> "0..1" Shelter : directs to
+  DisasterReport "1" <-- "0..*" DamageAssessment : assesses
+  DamageAssessment "1" <-- "1" RestorationJob : generates
+  RestorationJob "0..*" --> "1" Department : assigned to
+  User "1" --> "0..*" DisasterReport : reports and signs
+  User "1" --> "0..*" AuditEntry : signs
+  User --> Role
+  EvacuationAlert --> AlertLevel
+  DamageAssessment --> InfrastructureCategory
+  DamageAssessment --> DamageLevel

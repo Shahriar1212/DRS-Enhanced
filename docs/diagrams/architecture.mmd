@@ -1,0 +1,33 @@
+flowchart TB
+  subgraph T1["Tier 1 - Presentation (JavaFX client, MVC)"]
+    direction LR
+    V["View<br/>10 FXML screens (Scene Builder)<br/>drs.css"]
+    C["Controller<br/>LoginController, MainController,<br/>Dashboard, Report, Coordination,<br/>Volunteer, Resource, Evacuation,<br/>Damage, Admin controllers"]
+    CM["Client model proxy<br/>ServerConnection, ServerCall (Task),<br/>ClientSession"]
+    V <--> C --> CM
+  end
+  subgraph NET["TCP socket - port 5050 - serialised Request / Response objects (protocol package)"]
+  end
+  subgraph T2["Tier 2 - Business logic (multi-threaded server)"]
+    direction LR
+    S["DRSServer<br/>acceptor thread +<br/>fixed thread pool (20)"] --> H["ClientHandler<br/>(one per connected client)"]
+    H --> D["RequestDispatcher<br/>session check + AccessControl"]
+    D --> SV["Services<br/>AuthService, DisasterService,<br/>CoordinationManager, EvacuationService,<br/>DamageService, AuditService, ImportService"]
+    SV --> U["Domain rules (util)<br/>PriorityCalculator, CoordinationService,<br/>EvacuationPlanner, RestorationPlanner"]
+    SV --> SEC["Security<br/>PasswordHasher (PBKDF2), CryptoService (AES-GCM),<br/>SignatureService (RSA), SessionManager"]
+  end
+  subgraph T3["Tier 3 - Data (MySQL 8)"]
+    direction LR
+    DAO["DAO layer (JDBC, PreparedStatement)<br/>UserDAO, ReportDAO, DepartmentDAO, TaskDAO,<br/>VolunteerDAO, ShelterDAO, DamageDAO, AuditDAO"] --> DBM["DatabaseManager<br/>creates DB + 12 tables<br/>programmatically (Schema)"]
+    DBM --> DB[("drs_enhanced<br/>12 InnoDB tables")]
+  end
+  M["Shared domain model (Model)<br/>DisasterReport, Department, Resource, ResponseTask,<br/>Volunteer, User, Shelter, EvacuationAlert,<br/>DamageAssessment, RestorationJob, AuditEntry"]
+  CM --> NET --> S
+  SV --> DAO
+  M -.used by.- C
+  M -.used by.- SV
+  style T1 fill:#e7f0fb,stroke:#1c3a5e
+  style T2 fill:#fff1e6,stroke:#e8590c
+  style T3 fill:#ebfbee,stroke:#2b8a3e
+  style NET fill:#f1f3f5,stroke:#868e96
+  style M fill:#f8f0fc,stroke:#862e9c

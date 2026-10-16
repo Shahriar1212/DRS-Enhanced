@@ -1,0 +1,138 @@
+erDiagram
+  users {
+    INT user_id PK
+    VARCHAR username UK
+    VARCHAR full_name
+    VARCHAR password_hash "PBKDF2"
+    VARCHAR role
+    TEXT public_key "RSA"
+    TEXT private_key_enc "AES-GCM"
+    BOOLEAN active
+    INT failed_attempts
+    DATETIME created_at
+  }
+  departments {
+    INT department_id PK
+    VARCHAR name UK
+    VARCHAR type
+    VARCHAR contact_info
+    DATETIME created_at
+  }
+  resources {
+    INT resource_id PK
+    INT department_id FK
+    VARCHAR name
+    INT quantity_available
+    INT reorder_level
+    DATETIME updated_at
+  }
+  disaster_reports {
+    INT report_id PK
+    VARCHAR type
+    VARCHAR location
+    TEXT description
+    VARCHAR reporter_name
+    TEXT reporter_phone_enc "AES-GCM"
+    VARCHAR severity
+    INT priority_score
+    VARCHAR status
+    VARCHAR reported_by "username"
+    TEXT signature "SHA256withRSA"
+    DATETIME date_reported
+    DATETIME updated_at
+  }
+  volunteers {
+    INT volunteer_id PK
+    VARCHAR name
+    TEXT phone_enc "AES-GCM"
+    VARCHAR skill
+    BOOLEAN available
+    DATETIME registered_at
+  }
+  response_tasks {
+    INT task_id PK
+    INT report_id FK
+    INT department_id FK
+    INT volunteer_id FK "nullable"
+    VARCHAR description
+    INT priority
+    VARCHAR status
+    DATETIME created_at
+    DATETIME updated_at
+  }
+  resource_allocations {
+    INT allocation_id PK
+    INT task_id FK
+    INT resource_id FK
+    INT quantity
+    VARCHAR allocated_by
+    DATETIME allocated_at
+  }
+  shelters {
+    INT shelter_id PK
+    VARCHAR name UK
+    VARCHAR location
+    INT capacity
+    INT occupancy
+    VARCHAR contact
+    BOOLEAN closed
+    DATETIME updated_at
+  }
+  evacuation_alerts {
+    INT alert_id PK
+    INT report_id FK
+    VARCHAR zone
+    VARCHAR level
+    TEXT message
+    INT shelter_id FK "nullable"
+    VARCHAR status
+    VARCHAR issued_by
+    DATETIME issued_at
+    DATETIME lifted_at
+  }
+  damage_assessments {
+    INT assessment_id PK
+    INT report_id FK
+    VARCHAR category
+    VARCHAR damage_level
+    DECIMAL estimated_cost
+    INT affected_people
+    TEXT notes
+    VARCHAR assessed_by
+    DATETIME assessed_at
+  }
+  restoration_jobs {
+    INT job_id PK
+    INT assessment_id FK
+    INT department_id FK
+    VARCHAR description
+    INT priority
+    INT progress
+    VARCHAR status
+    INT estimated_days
+    DATETIME created_at
+    DATETIME updated_at
+  }
+  audit_log {
+    BIGINT audit_id PK
+    DATETIME ts
+    VARCHAR username
+    VARCHAR action
+    TEXT details
+    CHAR prev_hash "SHA-256 chain"
+    CHAR entry_hash
+    TEXT signature "RSA"
+  }
+  departments ||--o{ resources : holds
+  disaster_reports ||--o{ response_tasks : "coordinated by"
+  departments ||--o{ response_tasks : "carries out"
+  volunteers |o--o{ response_tasks : "assigned to"
+  response_tasks ||--o{ resource_allocations : receives
+  resources ||--o{ resource_allocations : "allocated in"
+  disaster_reports ||--o{ evacuation_alerts : "warned by"
+  shelters |o--o{ evacuation_alerts : "nominated in"
+  disaster_reports ||--o{ damage_assessments : "assessed in"
+  damage_assessments ||--|| restoration_jobs : generates
+  departments ||--o{ restoration_jobs : restores
+  users ||--o{ disaster_reports : "reports (reported_by)"
+  users ||--o{ audit_log : "signs (username)"

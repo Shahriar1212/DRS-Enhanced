@@ -1,0 +1,9 @@
+department,resource,quantity,reorder_level
+Fire & Emergency,Fire extinguishers,40,10
+Base Hospital,First aid kits,100,20
+Water Supply,Bottled water (cases),500,100
+Dept. of Transport,Sandbags,300,50
+Fire & Emergency,Rescue boats,6,2
+Base Hospital,Stretchers,25,5
+Ergon Energy,Portable generators,15,4
+Police Service,Traffic barriers,120,30
